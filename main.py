@@ -123,6 +123,45 @@ def add_cafe():
 
     return jsonify({"message": "Cafe added successfully!", "cafe": cafe_to_dict(new_cafe)}), 201
 
+
+@app.route("/update-price", methods=["PATCH"])
+def patch_cafe():
+    # Get the café ID from the query parameters
+    cafe_id = request.args.get("id")
+
+    # Validate input
+    if not cafe_id:
+        return jsonify({"error": "Missing café ID."}), 400
+
+    # Find the café by ID
+    cafe = Cafe.query.get(cafe_id)
+    if not cafe:
+        return jsonify({"error": "Cafe not found."}), 404
+
+    # Get all optional parameters from the query parameters
+    new_data = {
+        "name": request.args.get("name"),
+        "map_url": request.args.get("map_url"),
+        "img_url": request.args.get("img_url"),
+        "location": request.args.get("location"),
+        "seats": request.args.get("seats"),
+        "has_toilet": request.args.get("has_toilet") == 'true',
+        "has_wifi": request.args.get("has_wifi") == 'true',
+        "has_sockets": request.args.get("has_sockets") == 'true',
+        "can_take_calls": request.args.get("can_take_calls") == 'true',
+        "coffee_price": request.args.get("coffee_price"),
+    }
+
+    # Update only the fields that are provided
+    for key, value in new_data.items():
+        if value is not None:
+            setattr(cafe, key, value)
+
+    db.session.commit()
+
+    return jsonify({"message": "Cafe updated successfully!", "cafe": cafe_to_dict(cafe)}), 200
+
+
 # HTTP GET - Read Record
 
 # HTTP POST - Create Record
