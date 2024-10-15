@@ -92,13 +92,36 @@ def all_cafes():
     result = get_cafes(action="all")
     return jsonify(result)
 
-@app.route("/search/<location>")
-def search_cafes(location):
+@app.route("/search")
+def search_cafes():
+    location = request.args.get("loc")
     result = get_cafes(action="search", location=location)
     return jsonify(result)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route("/add", methods=["POST"])
+def add_cafe():
+    # Get data from the request body
+    new_cafe_data = request.json
+
+    # Create a new Cafe object
+    new_cafe = Cafe(
+        name=new_cafe_data["name"],
+        map_url=new_cafe_data["map_url"],
+        img_url=new_cafe_data["img_url"],
+        location=new_cafe_data["location"],
+        seats=new_cafe_data["seats"],
+        has_toilet=new_cafe_data["has_toilet"],
+        has_wifi=new_cafe_data["has_wifi"],
+        has_sockets=new_cafe_data["has_sockets"],
+        can_take_calls=new_cafe_data["can_take_calls"],
+        coffee_price=new_cafe_data["coffee_price"],
+    )
+
+    # Add the new café to the database
+    db.session.add(new_cafe)
+    db.session.commit()
+
+    return jsonify({"message": "Cafe added successfully!", "cafe": cafe_to_dict(new_cafe)}), 201
 
 # HTTP GET - Read Record
 
