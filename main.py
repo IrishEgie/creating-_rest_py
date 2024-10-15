@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean
 import random
+import os
 '''
 Install the required packages first: 
 Open the Terminal in PyCharm (bottom left). 
@@ -162,25 +163,22 @@ def patch_cafe():
     return jsonify({"message": "Cafe updated successfully!", "cafe": cafe_to_dict(cafe)}), 200
 
 
-@app.route("/delete", methods=["DELETE"])
-def delete_cafe():
-    # Get the café ID from the query parameters
-    cafe_id = request.args.get("id")
+@app.route("/report-closed/<int:cafe_id>", methods=["DELETE"])
+def delete_cafe(cafe_id):
+    api_key = request.args.get("api-key")
+    if api_key == os.getenv('API_KEY'):
+        cafe = db.get_or_404(Cafe, cafe_id)
+        db.session.delete(cafe)
+        db.session.commit()
+        return jsonify(response={"success": "Successfully deleted the cafe from the database."}), 200
+    else:
+        return jsonify(error={"Forbidden": "Sorry, that's not allowed. Make sure you have the correct api_key."}), 403
 
-    # Validate input
-    if not cafe_id:
-        return jsonify({"error": "Missing café ID."}), 400
 
-    # Find the café by ID
-    cafe = Cafe.query.get(cafe_id)
-    if not cafe:
-        return jsonify({"error": "Cafe not found."}), 404
-
-    # Delete the café
-    db.session.delete(cafe)
-    db.session.commit()
-
-    return jsonify({"message": "Cafe deleted successfully!"}), 200
+@app.route("/test-db")
+def test_db():
+    cafes = Cafe.query.all()
+    return jsonify({"cafes_count": len(cafes)})
 
 # HTTP GET - Read Record
 
