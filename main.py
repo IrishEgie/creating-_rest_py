@@ -2,7 +2,7 @@ from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Boolean
-
+import random
 '''
 Install the required packages first: 
 Open the Terminal in PyCharm (bottom left). 
@@ -50,6 +50,25 @@ with app.app_context():
 def home():
     return render_template("index.html")
 
+@app.route("/random")
+def random_cafe():
+    cafes = Cafe.query.all()  # Get all cafes
+    if not cafes:
+        return jsonify({"error": "No cafes found."}), 404  # Handle case where no cafes exist
+    random_cafe = random.choice(cafes)  # Select a random cafe
+    return jsonify({
+        "id": random_cafe.id,
+        "name": random_cafe.name,
+        "map_url": random_cafe.map_url,
+        "img_url": random_cafe.img_url,
+        "location": random_cafe.location,
+        "seats": random_cafe.seats,
+        "has_toilet": random_cafe.has_toilet,
+        "has_wifi": random_cafe.has_wifi,
+        "has_sockets": random_cafe.has_sockets,
+        "can_take_calls": random_cafe.can_take_calls,
+        "coffee_price": random_cafe.coffee_price,
+    })
 
 # HTTP GET - Read Record
 
