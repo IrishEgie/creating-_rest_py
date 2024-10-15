@@ -101,6 +101,11 @@ def search_cafes():
 
 @app.route("/add", methods=["POST"])
 def add_cafe():
+    # Check for the API key in the request
+    api_key = request.args.get("api-key")
+    if api_key != os.getenv('API_KEY'):
+        return jsonify({"error": "Forbidden: Invalid API key."}), 403
+
     # Get data from the request body
     new_cafe_data = request.json
 
@@ -123,6 +128,7 @@ def add_cafe():
     db.session.commit()
 
     return jsonify({"message": "Cafe added successfully!", "cafe": cafe_to_dict(new_cafe)}), 201
+
 
 
 @app.route("/update-price", methods=["PATCH"])
