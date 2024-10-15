@@ -162,6 +162,26 @@ def patch_cafe():
     return jsonify({"message": "Cafe updated successfully!", "cafe": cafe_to_dict(cafe)}), 200
 
 
+@app.route("/delete", methods=["DELETE"])
+def delete_cafe():
+    # Get the café ID from the query parameters
+    cafe_id = request.args.get("id")
+
+    # Validate input
+    if not cafe_id:
+        return jsonify({"error": "Missing café ID."}), 400
+
+    # Find the café by ID
+    cafe = Cafe.query.get(cafe_id)
+    if not cafe:
+        return jsonify({"error": "Cafe not found."}), 404
+
+    # Delete the café
+    db.session.delete(cafe)
+    db.session.commit()
+
+    return jsonify({"message": "Cafe deleted successfully!"}), 200
+
 # HTTP GET - Read Record
 
 # HTTP POST - Create Record
